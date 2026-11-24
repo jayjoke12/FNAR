@@ -1,0 +1,19 @@
+build/
+bin/
+*.o
+*.a
+*.so
+*.dylib
+*.exe
+compile_commands.json
+.cache/
+.vscode/
+.idea/
+save.dat
+build-win/
+
+# Platform build outputs
+/build/
+/android/.gradle/
+/android/app/build/
+/android/local.properties
