@@ -1,0 +1,20 @@
+                        -HF:\fnaf-main
+-DCMAKE_SYSTEM_NAME=Android
+-DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+-DCMAKE_SYSTEM_VERSION=24
+-DANDROID_PLATFORM=android-24
+-DANDROID_ABI=x86_64
+-DCMAKE_ANDROID_ARCH_ABI=x86_64
+-DANDROID_NDK=F:\Programs\AndroidVD\ndk\27.0.12077973
+-DCMAKE_ANDROID_NDK=F:\Programs\AndroidVD\ndk\27.0.12077973
+-DCMAKE_TOOLCHAIN_FILE=F:\Programs\AndroidVD\ndk\27.0.12077973\build\cmake\android.toolchain.cmake
+-DCMAKE_MAKE_PROGRAM=F:\Programs\AndroidVD\cmake\3.22.1\bin\ninja.exe
+-DCMAKE_CXX_FLAGS=-std=c++17
+-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=F:\fnaf-main\android\app\build\intermediates\cxx\RelWithDebInfo\416yj2r1\obj\x86_64
+-DCMAKE_RUNTIME_OUTPUT_DIRECTORY=F:\fnaf-main\android\app\build\intermediates\cxx\RelWithDebInfo\416yj2r1\obj\x86_64
+-DCMAKE_BUILD_TYPE=RelWithDebInfo
+-BF:\fnaf-main\android\app\.cxx\RelWithDebInfo\416yj2r1\x86_64
+-GNinja
+-DANDROID_STL=c++_static
+                        Build command args: []
+                        Version: 2

@@ -70,11 +70,12 @@ static bool HasValidAssets(const fs::path& baseDir) {
 
 static fs::path GetCacheDirectory() {
 #if defined(__ANDROID__)
-    // Android's working directory and /tmp are not writable. Use this app's
-    // private internal storage so extraction, settings and save.dat persist.
+    // raylib's Android file loader resolves relative paths against internalDataPath,
+    // so bundled assets must be extracted directly there (not in a nested folder).
+    // Settings and save.dat share this app-private directory as well.
     struct android_app* app = GetFNAFAndroidApp();
     if (app && app->activity && app->activity->internalDataPath) {
-        return fs::path(app->activity->internalDataPath) / "FNAF_Game";
+        return fs::path(app->activity->internalDataPath);
     }
     return fs::path("/data/local/tmp/FNAF_Game");
 #elif defined(_WIN32)
@@ -127,7 +128,7 @@ bool EnsureAssetsReady() {
 
         // Bump this when bundled assets change so existing standalone installs
         // re-extract their cache instead of keeping stale audio and images.
-        fs::path markerPath = cacheDir / ".extracted_v4";
+        fs::path markerPath = cacheDir / ".extracted_v6";
         std::error_code ec;
 
         if (fs::exists(markerPath, ec) && HasValidAssets(cacheDir)) {

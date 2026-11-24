@@ -29,7 +29,7 @@ if errorlevel 1 (
 )
 
 echo Building Android ARM64 landscape APK...
-gradle -p android assembleRelease
+call gradle -p android assembleRelease
 if errorlevel 1 exit /b 1
 
 if not exist "android\app\build\outputs\apk\release\app-release.apk" (

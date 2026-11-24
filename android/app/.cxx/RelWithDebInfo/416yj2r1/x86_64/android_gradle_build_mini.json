@@ -1,0 +1,38 @@
+{
+  "buildFiles": [
+    "F:\\fnaf-main\\CMakeLists.txt",
+    "F:\\fnaf-main\\thirdparty\\raylib\\cmake\\CompileDefinitions.cmake",
+    "F:\\fnaf-main\\thirdparty\\raylib\\cmake\\GlfwImport.cmake",
+    "F:\\fnaf-main\\thirdparty\\raylib\\cmake\\JoinPaths.cmake",
+    "F:\\fnaf-main\\thirdparty\\raylib\\cmake\\LibraryConfigurations.cmake",
+    "F:\\fnaf-main\\thirdparty\\raylib\\CMakeLists.txt"
+  ],
+  "cleanCommandsComponents": [
+    [
+      "F:\\Programs\\AndroidVD\\cmake\\3.22.1\\bin\\ninja.exe",
+      "-C",
+      "F:\\fnaf-main\\android\\app\\.cxx\\RelWithDebInfo\\416yj2r1\\x86_64",
+      "clean"
+    ]
+  ],
+  "buildTargetsCommandComponents": [
+    "F:\\Programs\\AndroidVD\\cmake\\3.22.1\\bin\\ninja.exe",
+    "-C",
+    "F:\\fnaf-main\\android\\app\\.cxx\\RelWithDebInfo\\416yj2r1\\x86_64",
+    "{LIST_OF_TARGETS_TO_BUILD}"
+  ],
+  "libraries": {
+    "fnaf::@6890427a1f51a3e7e1df": {
+      "artifactName": "fnaf",
+      "abi": "x86_64",
+      "output": "F:\\fnaf-main\\android\\app\\build\\intermediates\\cxx\\RelWithDebInfo\\416yj2r1\\obj\\x86_64\\libfnaf.so",
+      "runtimeFiles": []
+    },
+    "raylib::@fc0ad9ec331c78bb0223": {
+      "artifactName": "raylib",
+      "abi": "x86_64",
+      "output": "F:\\fnaf-main\\android\\app\\.cxx\\RelWithDebInfo\\416yj2r1\\x86_64\\thirdparty\\raylib\\libraylib.a",
+      "runtimeFiles": []
+    }
+  }
+}

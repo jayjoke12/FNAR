@@ -2,8 +2,6 @@
 import os
 import sys
 import struct
-import io
-from PIL import Image
 
 def pack_assets(source_dirs, output_path):
     bundle = bytearray()
@@ -25,33 +23,10 @@ def pack_assets(source_dirs, output_path):
     bundle.extend(struct.pack('<I', len(files_to_pack)))
     for rel_path, full_path in files_to_pack:
         rel_bytes = rel_path.encode('utf-8')
-        data = None
-
-        # Optimize opaque images (jumpscares, camera feeds, office, menu freddy frames) as high-quality JPEG (Q=85).
-        # Raylib uses stb_image with SUPPORT_FILEFORMAT_JPG which loads JPEG transparently.
-        # Images with alpha transparency (e.g. map.png, UI sprites, scanlines) stay as pure PNG.
-        if rel_path.endswith('.png'):
-            try:
-                with Image.open(full_path) as img:
-                    has_alpha = False
-                    if img.mode in ('RGBA', 'LA'):
-                        alpha_channel = img.split()[-1]
-                        min_alpha, _ = alpha_channel.getextrema()
-                        if min_alpha < 255:
-                            has_alpha = True
-                    elif img.mode == 'P' and 'transparency' in img.info:
-                        has_alpha = True
-
-                    if not has_alpha and img.size[0] > 64 and img.size[1] > 64:
-                        buf = io.BytesIO()
-                        img.convert('RGB').save(buf, format='JPEG', quality=85, optimize=True)
-                        data = buf.getvalue()
-            except Exception:
-                data = None
-
-        if data is None:
-            with open(full_path, 'rb') as f:
-                data = f.read()
+        # Preserve each file's actual encoding. Raylib selects its image decoder
+        # from the bundled path extension, so JPEG bytes stored as .png fail to load.
+        with open(full_path, 'rb') as f:
+            data = f.read()
 
         bundle.extend(struct.pack('<H', len(rel_bytes)))
         bundle.extend(rel_bytes)
