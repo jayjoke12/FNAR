@@ -28,7 +28,7 @@ if errorlevel 1 (
     exit /b 1
 )
 
-echo Building Android ARM64 landscape APK...
+echo Building Android ARM64 and x86_64 landscape APK...
 call gradle -p android assembleRelease
 if errorlevel 1 exit /b 1
 

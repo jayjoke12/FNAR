@@ -20,9 +20,12 @@ if errorlevel 1 exit /b 1
 if exist build\pc_windows\Release\fnaf.exe (
     echo.
     echo PC build complete: build\pc_windows\Release\fnaf.exe
+    exit /b 0
 ) else if exist build\pc_windows\fnaf.exe (
     echo.
     echo PC build complete: build\pc_windows\fnaf.exe
+    exit /b 0
 ) else (
     echo Build finished, but fnaf.exe was not found in the expected output folders.
+    exit /b 1
 )
