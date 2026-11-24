@@ -1,0 +1,6 @@
+F:\fnaf-main\CMakeLists.txt
+F:\fnaf-main\thirdparty\raylib\cmake\CompileDefinitions.cmake
+F:\fnaf-main\thirdparty\raylib\cmake\GlfwImport.cmake
+F:\fnaf-main\thirdparty\raylib\cmake\JoinPaths.cmake
+F:\fnaf-main\thirdparty\raylib\cmake\LibraryConfigurations.cmake
+F:\fnaf-main\thirdparty\raylib\CMakeLists.txt
