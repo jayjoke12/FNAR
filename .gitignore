@@ -1,19 +1,67 @@
-build/
-bin/
-*.o
+# Build outputs
+/build/
+/bin/
+/out/
+/dist/
+/build-win/
+*.exe
+*.dll
+*.lib
+*.pdb
+*.ilk
+*.exp
 *.a
 *.so
 *.dylib
-*.exe
+*.o
+*.obj
+
+# CMake and compiler caches
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
 compile_commands.json
 .cache/
+*.ninja
+*.ninja_deps
+*.ninja_log
+
+# Runtime and local data
+/save.dat
+/fnaf_log.txt
+/settings.json
+*.log
+*.bak
+*.tmp
+
+# Visual Studio and IDE files
+.vs/
 .vscode/
 .idea/
-save.dat
-build-win/
+*.sln
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+*.code-workspace
+.clangd/
 
-# Platform build outputs
-/build/
+# Android/Gradle build output
 /android/.gradle/
 /android/app/build/
+/android/build/
 /android/local.properties
+/android/.idea/
+*.iml
+*.jks
+*.keystore
+*.apk
+*.aab
+
+# Operating system files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Python cache
+__pycache__/
+*.py[cod]

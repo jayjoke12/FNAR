@@ -1,8 +1,10 @@
-# Five Nights at Freddy's — C++ Fan-Made Recreation
+# Five Nights at Rohan's — C++ Fan-Made Recreation
 
-A complete, faithful, playable fan recreation of **Five Nights at Freddy's 1**, written from scratch in modern **C++17** using **raylib 5.x**.
+A complete, playable fan-made mod/recreation of **Five Nights at Rohan's**, written in modern **C++17** using **raylib 5.x**.
 
-This project recreates the full core FNAF 1 gameplay loop: realistic animatronic AI with authentic movement opportunities and camera interactions, interactive security office with independent blast doors and hallway lights, a multi-camera surveillance system with 11 distinct rooms, delta-timed power management, 5 progressive nights plus an unlocked Custom Night, original tutorial subtitles, procedural sound synthesis, atmospheric visual effects, and violent jumpscares.
+This project recreates the core Five Nights at Rohan's gameplay loop: animatronic AI with scripted movement opportunities and camera interactions, an interactive security office with independent blast doors and hallway lights, a multi-camera surveillance system with 11 distinct rooms, delta-timed power management, 5 progressive nights plus an unlocked Custom Night, tutorial subtitles, procedural sound synthesis, atmospheric visual effects, and jumpscare sequences.
+
+> **Work in Progress:** Five Nights at Rohan's is still under development, and some existing assets and character names may remain from the original recreation until they are replaced or renamed.
 
 ---
 
@@ -30,7 +32,7 @@ This project recreates the full core FNAF 1 gameplay loop: realistic animatronic
 
 ## Features
 
-- **Authoritative Gameplay Loop**: Survive from 12 AM to 6 AM across 5 increasingly tense nights, leading to an authentic paycheck victory screen.
+- **Authoritative Gameplay Loop**: Survive from 12 AM to 6 AM across 5 increasingly tense nights, leading to a victory screen.
 - **Interactive Security Office**:
   - Horizontal panning with smooth interpolation via mouse edge navigation or `A`/`D` keys.
   - Left and right security blast doors with motorized sliding animations.
@@ -39,22 +41,22 @@ This project recreates the full core FNAF 1 gameplay loop: realistic animatronic
   - Office desk props, posters, party banners, and CRT equipment.
 - **11-Camera Surveillance System**:
   - Toggleable monitor interface via `SPACE` or bottom screen bar with smooth flip animations.
-  - Clickable restaurant mini-map and numerical hotkeys (`1`-`9`).
+  - Clickable venue mini-map and numerical hotkeys (`1`-`9`).
   - Authoritative room layouts with unique perspective geometry and props.
   - CAM 6 Kitchen: Faithful audio-only feed with metallic pots/pans clattering cues.
   - Procedural static noise, CRT scanlines, and camera switching static bursts.
-- **Authentic Animatronic AI**:
+- **Modded Animatronic AI**:
   - **Rabbit (Bonnie)**: Aggressive left-side roamer with ~4.97s interval; lurks at the left door; retreats if door is closed or attacks if ignored.
   - **Chicken (Chica)**: Persistent right-side roamer with ~4.98s interval; clatters in the kitchen; peers in through the right doorway window.
   - **Bear (Freddy)**: Stealth stalker with ~3.02s interval; freezes while directly observed on cameras; sneaks in through the East Hall Corner into the office.
-  - **Fox (Foxy)**: Pirate Cove state machine (Hidden → Watching → Preparing → Running); stalled by camera surveillance; sprints down West Hall; knocks on closed door draining power or triggers a fatal jumpscare.
+  - **Fox (Foxy)**: Cove/Pirate Cove state machine (Hidden → Watching → Preparing → Running); stalled by camera surveillance; sprints down West Hall; knocks on closed door draining power or triggers a fatal jumpscare.
   - **Rare Visitor (Golden Bear)**: Rare office hallucination with a quick reaction window—flip your monitor up to dispel it before it attacks.
 - **Realistic Power Management**:
   - 100% electricity pool drained based on active systems (Base, Doors, Lights, Monitor).
   - Dynamic 1–4+ usage bars.
-  - Power blackout sequence: complete electrical shutdown, pitch dark office, Bear's glowing eyes in the left doorway with the iconic music box lullaby, and power-out jumpscare.
+  - Power blackout sequence: complete electrical shutdown, pitch dark office, the Bear's glowing eyes in the left doorway with a music box lullaby, and power-out jumpscare.
 - **Procedural Sound Synthesis & Custom Asset Support**:
-  - Built-in real-time 16-bit PCM waveform generator that synthesizes all sounds (doors, lights, footsteps, camera static, desk fan, jumpscare screech, Toreador music box, and 6 AM victory chime) without requiring external copyrighted assets.
+  - Built-in real-time 16-bit PCM waveform generator that synthesizes all sounds (doors, lights, footsteps, camera static, desk fan, jumpscare screech, blackout music box, and 6 AM victory chime) without requiring external copyrighted assets.
   - Automatically loads custom `.wav` and `.ogg` files placed in `assets/audio/` if present.
 - **Custom Night & Progression**:
   - Save game persistence (`save.dat`) recording highest unlocked night.
@@ -101,8 +103,8 @@ sudo apt-get install -y build-essential cmake libasound2-dev libx11-dev libxrand
 
 Build the release executable:
 ```bash
-git clone https://github.com/your-username/fnaf-cpp.git
-cd fnaf-cpp
+git clone https://github.com/jayjoke12/FNAR.git
+cd FNAR
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build -j$(nproc)
 ```
@@ -125,7 +127,7 @@ cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build --config Release
 ```
 
-The game executable will be generated at `build\Release\fnaf.exe`.
+The game executable will be generated at `build\Release\fnaf.exe`. Internal executable and asset filenames retain the original technical names used by the source code.
 
 ---
 
@@ -195,7 +197,7 @@ The game simulation, animatronic AI, power drain and night progression are share
 ## Project Structure
 
 ```text
-FNAF-CPP/
+FNAR/
 ├── CMakeLists.txt              # Platform-aware CMake configuration
 ├── build_pc.bat                # Build Windows executable
 ├── build_android.bat           # Build Android APK
@@ -299,10 +301,10 @@ The software follows a modular design adhering to strict separation of gameplay 
   1. *Stage 0 (Hidden)*: Completely behind the starry curtains.
   2. *Stage 1 (Watching)*: Peeking out through the parted curtains.
   3. *Stage 2 (Preparing)*: Standing outside the curtains, poised to sprint.
-  4. *Stage 3 (Running)*: Pirate Cove is empty ("IT'S ME"). Foxy is sprinting down CAM 2A!
-- **Behavior**: Viewing Pirate Cove stalls Foxy's progression. When Running, the player has ~3.5 seconds to close the Left Door.
-  - If closed: Foxy knocks heavily on the door (`THUD THUD THUD`), drains power (`1% + 5% * knocks`), and resets to Stage 0.
-  - If open: Foxy bursts into the office for an instant jumpscare.
+  4. *Stage 3 (Running)*: Pirate Cove is empty. Fox is sprinting down CAM 2A!
+- **Behavior**: Viewing Pirate Cove stalls the Fox's progression. When Running, the player has ~3.5 seconds to close the Left Door.
+  - If closed: Fox knocks heavily on the door (`THUD THUD THUD`), drains power (`1% + 5% * knocks`), and resets to Stage 0.
+  - If open: Fox bursts into the office for an instant jumpscare.
 
 ### 5. Rare Visitor (Golden Bear)
 - **Behavior**: Rare hallucination appearing slumped on the office floor when lowering the monitor. If triggered, the player must quickly raise the camera monitor within 3.0 seconds to dispel it, or suffer a reality-distorting jumpscare.
@@ -336,7 +338,7 @@ All 5 nights can be balanced directly in `config/nights.json`:
 Power drain logic is located in `src/Power.cpp`:
 - Base usage: ~0.105% / second (at 1 bar, lasts ~16 minutes of continuous operation).
 - Each active system (Left Door, Right Door, Left Light, Right Light, Camera Monitor) adds +1 usage level (+0.105%/s).
-- Foxy door knock drain: `1.0f + 5.0f * knocks`.
+- Fox door knock drain: `1.0f + 5.0f * knocks`.
 
 ### Replacing Assets & Adding Audio
 
@@ -349,9 +351,9 @@ To replace procedural placeholder graphics or sounds, place files directly into 
   - `jumpscare.wav`: Jumpscare screech.
   - `ambient.wav`: Night ambient drone.
   - `camera_switch.wav`: Camera switching blip.
-  - `fox_knock.wav`: Foxy door impact.
+  - `fox_knock.wav`: Fox door impact.
   - `power_out.wav`: Power shutdown turbine wind-down.
-  - `power_music.wav`: Toreador music box melody.
+  - `power_music.wav`: Blackout music box melody.
   - `kitchen.wav`: Pots and pans clattering.
   - `chime_6am.wav`: 6 AM celebration chime.
 
@@ -372,7 +374,7 @@ Chicken AI: 5 | Loc: Restrooms
 Fox AI: 2 | State: 1
 Keys: [1] Move Rabbit  [2] Move Chicken
       [3] Move Bear    [4] Advance Fox
-      [P] Drain Power  [G] Golden Bear
+      [P] Drain Power  [G] Rare Visitor
       [N] Skip to 6AM  [J] Test Jumpscare
       [Q/E] Doors      [Z/C] Lights
 ```
@@ -382,6 +384,6 @@ Keys: [1] Move Rabbit  [2] Move Chicken
 - **`3`**: Force Bear to advance to next room.
 - **`4`**: Advance Fox to next Pirate Cove stage.
 - **`P`**: Immediately drain power to 0% to test the blackout sequence.
-- **`G`**: Force spawn Golden Bear hallucination.
+- **`G`**: Force spawn a Rare Visitor hallucination.
 - **`N`**: Fast-forward night clock to 6 AM (trigger victory).
 - **`J`**: Trigger immediate jumpscare sequence.
