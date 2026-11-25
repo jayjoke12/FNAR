@@ -1,5 +1,6 @@
 #include "Game.h"
 #include "BundleManager.h"
+#include "RohanNight.h"
 #include <raylib.h>
 #include <algorithm>
 #include <cmath>
@@ -108,10 +109,12 @@ bool Game::Initialize() {
     m_audio.Initialize();
     m_settings.Apply();
     m_nightManager.Initialize();
+    m_debugDefaultHourDuration = m_nightManager.GetHourDuration();
 
     m_office.LoadAssets(m_assets);
     m_cameras.LoadAssets(m_assets);
     m_ui.LoadAssets(m_assets);
+    m_rohansNight.LoadAssets(m_assets);
 
     LogDebug("Game::Initialize: Creating render target...");
     m_screenTarget = LoadRenderTexture(SCREEN_WIDTH, SCREEN_HEIGHT);
@@ -163,26 +166,65 @@ void Game::ProcessInput() {
     }
 
     // Debug toggle
-    if (IsKeyPressed(KEY_F1)) {
+    if (m_state != GameState::RohansNight && IsKeyPressed(KEY_F1)) {
         m_debugMode = !m_debugMode;
         m_audio.PlayBlip();
     }
 
     // Debug cheats
-    if (m_debugMode) {
+    if (m_debugMode && m_state != GameState::RohansNight) {
         if (IsKeyPressed(KEY_P)) {
             m_power.DepleteInstantly();
         }
+        if (IsKeyPressed(KEY_R)) {
+            m_audio.PlayPowerOutMusic(false);
+            m_power.Reset();
+            m_audio.PlayAmbient(true);
+            m_audio.PlayFanHum(true);
+        }
         if (IsKeyPressed(KEY_N)) {
             m_nightManager.SetHourDuration(0.01f); // fast forward to 6 AM
+        }
+        if (IsKeyPressed(KEY_H)) {
+            m_nightManager.AdvanceHourForDebug();
+        }
+        if (IsKeyPressed(KEY_T)) {
+            m_debugAiFrozen = !m_debugAiFrozen;
+        }
+        if (IsKeyPressed(KEY_Y)) {
+            m_debugClockFrozen = !m_debugClockFrozen;
+        }
+        if (IsKeyPressed(KEY_F5)) {
+            m_nightManager.SetHourDuration(m_debugDefaultHourDuration);
+            m_nightManager.StartNight(m_nightManager.GetCurrentNight());
+            StartNightSession();
+            m_state = GameState::Playing;
+        }
+        if (IsKeyPressed(KEY_F6)) {
+            const int attacker = (static_cast<int>(m_activeJumpscareAttacker) + 1) %
+                                 (static_cast<int>(AnimatronicID::Fox) + 1);
+            m_activeJumpscareAttacker = static_cast<AnimatronicID>(attacker);
+        }
+        if (IsKeyPressed(KEY_F7) || IsKeyPressed(KEY_F8)) {
+            const int change = IsKeyPressed(KEY_F8) ? 1 : -1;
+            m_animatronics.SetAILevels(m_animatronics.GetBearAI() + change,
+                                       m_animatronics.GetRabbitAI() + change,
+                                       m_animatronics.GetChickenAI() + change,
+                                       m_animatronics.GetFoxAI() + change);
         }
         if (IsKeyPressed(KEY_G)) {
             m_animatronics.TriggerGoldenBear();
         }
         if (IsKeyPressed(KEY_J)) {
-            m_activeJumpscareAttacker = AnimatronicID::Bear;
             m_ui.StartJumpscare();
             m_state = GameState::Jumpscare;
+        }
+        if (IsKeyPressed(KEY_F9)) {
+            m_animatronics.Reset(m_animatronics.GetBearAI(),
+                                 m_animatronics.GetRabbitAI(),
+                                 m_animatronics.GetChickenAI(),
+                                 m_animatronics.GetFoxAI(),
+                                 m_settings.rareVisitorEnabled);
         }
         if (IsKeyPressed(KEY_ONE))   m_animatronics.ForceMove(AnimatronicID::Rabbit);
         if (IsKeyPressed(KEY_TWO))   m_animatronics.ForceMove(AnimatronicID::Chicken);
@@ -200,6 +242,16 @@ void Game::ProcessInput() {
             }
             if (m_state == GameState::NightIntro) {
                 m_nightIntroTimer = 0.0f;
+            } else if (m_state == GameState::RohansNight) {
+                m_rohansNight.Start(m_audio);
+            }
+            break;
+
+        case GameState::RohansNight:
+            m_rohansNight.HandleInput(m_audio);
+            if (m_rohansNight.ConsumeReturnToMenu()) {
+                m_state = GameState::MainMenu;
+                m_audio.PlayMenuMusic(true);
             }
             break;
 
@@ -363,7 +415,9 @@ void Game::Update(float dt) {
             m_cameras.Update(dt, m_power.IsDepleted(), m_audio);
 
             // 3. Update Night Manager & clock
-            m_nightManager.Update(dt);
+            if (!m_debugClockFrozen) {
+                m_nightManager.Update(dt);
+            }
             if (m_nightManager.IsPhoneCallActive() && !m_audio.IsPhoneCallPlaying()) {
                 m_nightManager.EndPhoneCall();
             }
@@ -375,13 +429,15 @@ void Game::Update(float dt) {
             }
 
             // 4. Update Animatronics AI
-            m_animatronics.Update(dt,
-                                  monitorUp,
-                                  m_cameras.GetCurrentCamera(),
-                                  leftDoor,
-                                  rightDoor,
-                                  m_audio,
-                                  m_power);
+            if (!m_debugAiFrozen) {
+                m_animatronics.Update(dt,
+                                      monitorUp,
+                                      m_cameras.GetCurrentCamera(),
+                                      leftDoor,
+                                      rightDoor,
+                                      m_audio,
+                                      m_power);
+            }
 
             // Check attack jumpscare
             if (m_animatronics.IsJumpscareReady()) {
@@ -403,6 +459,10 @@ void Game::Update(float dt) {
 
             break;
         }
+
+        case GameState::RohansNight:
+            m_rohansNight.Update(dt, m_audio);
+            break;
 
         case GameState::Paused:
             // Intentionally do not advance gameplay systems while paused.
@@ -449,6 +509,10 @@ void Game::Render() {
             m_ui.RenderNightIntro(m_nightManager.GetCurrentNight(), m_nightIntroTimer, m_assets);
             break;
         }
+
+        case GameState::RohansNight:
+            m_rohansNight.Render(m_settings.crtEffects);
+            break;
 
         case GameState::Playing: {
             // Render 3D-perspective Office
@@ -525,7 +589,7 @@ void Game::Render() {
     }
 #endif
 
-    if (m_debugMode) {
+    if (m_debugMode && m_state != GameState::RohansNight) {
         RenderDebugOverlay();
     }
 
@@ -569,10 +633,10 @@ void Game::Render() {
 }
 
 void Game::RenderDebugOverlay() {
-    DrawRectangle(10, 10, 440, 310, Color{ 0, 0, 0, 210 });
-    DrawRectangleLinesEx(Rectangle{ 10, 10, 440, 310 }, 1, GREEN);
+    DrawRectangle(10, 10, 640, 470, Color{ 0, 0, 0, 220 });
+    DrawRectangleLinesEx(Rectangle{ 10, 10, 640, 470 }, 1, GREEN);
 
-    DrawText("=== DEBUG MODE (F1 to Toggle | F2 Log Mem) ===", 20, 16, 14, GREEN);
+    DrawText("=== DEBUG TOOLS (F1 HIDE | F2 MEMORY REPORT) ===", 20, 16, 14, GREEN);
 
     long rssKb = AssetManager::GetCurrentVmRSSKb();
     size_t texBytes = m_assets.GetTotalTextureBytes();
@@ -581,27 +645,69 @@ void Game::RenderDebugOverlay() {
                          std::to_string(texBytes / (1024 * 1024)) + " MB (" + std::to_string(texCount) + " tex)";
     DrawText(memStr.c_str(), 20, 38, 14, ORANGE);
 
-    std::string pStr = "Power: " + std::to_string(static_cast<int>(m_power.GetPower())) + "% | Usage: " + std::to_string(m_power.GetUsageLevel());
+    const int hour = m_nightManager.GetCurrentHour();
+    const char* stateName = "Unknown";
+    switch (m_state) {
+        case GameState::MainMenu: stateName = "Main Menu"; break;
+        case GameState::NightIntro: stateName = "Night Intro"; break;
+        case GameState::Playing: stateName = "Playing"; break;
+        case GameState::Jumpscare: stateName = "Jumpscare"; break;
+        case GameState::GameOver: stateName = "Game Over"; break;
+        case GameState::NightComplete: stateName = "Night Complete"; break;
+        case GameState::Win: stateName = "Win"; break;
+        case GameState::CustomNightSelect: stateName = "Custom Night"; break;
+        case GameState::SettingsMenu: stateName = "Settings"; break;
+        case GameState::Paused: stateName = "Paused"; break;
+        case GameState::Credits: stateName = "Credits"; break;
+        case GameState::RohansNight: stateName = "Rohan's Night"; break;
+    }
+    std::string pStr = "Night " + std::to_string(m_nightManager.GetCurrentNight()) + " | Hour: " +
+                       std::to_string(hour == 0 ? 12 : hour) + " AM | State: " + stateName;
     DrawText(pStr.c_str(), 20, 58, 14, YELLOW);
 
-    std::string bStr = "Bear AI: " + std::to_string(m_animatronics.GetBearAI()) + " | Loc: " + GetLocationName(m_animatronics.GetBearLocation());
-    DrawText(bStr.c_str(), 20, 78, 14, WHITE);
+    std::string sysStr = "Power: " + std::to_string(static_cast<int>(m_power.GetPower())) +
+                         "% | Usage: " + std::to_string(m_power.GetUsageLevel()) +
+                         " | AI: " + (m_debugAiFrozen ? "FROZEN" : "RUNNING") +
+                         " | Clock: " + (m_debugClockFrozen ? "FROZEN" : "RUNNING");
+    DrawText(sysStr.c_str(), 20, 78, 14, ORANGE);
 
-    std::string rStr = "Rabbit AI: " + std::to_string(m_animatronics.GetRabbitAI()) + " | Loc: " + GetLocationName(m_animatronics.GetRabbitLocation());
-    DrawText(rStr.c_str(), 20, 98, 14, WHITE);
+    std::string officeStr = std::string("Doors L/R: ") + (m_office.IsLeftDoorClosed() ? "C" : "O") + "/" +
+                            (m_office.IsRightDoorClosed() ? "C" : "O") + " | Lights L/R: " +
+                            (m_office.IsLeftLightActive() ? "ON" : "OFF") + "/" +
+                            (m_office.IsRightLightActive() ? "ON" : "OFF") + " | Monitor: " +
+                            (m_cameras.IsMonitorUp() ? "UP" : "DOWN");
+    DrawText(officeStr.c_str(), 20, 98, 14, SKYBLUE);
 
-    std::string cStr = "Chicken AI: " + std::to_string(m_animatronics.GetChickenAI()) + " | Loc: " + GetLocationName(m_animatronics.GetChickenLocation());
-    DrawText(cStr.c_str(), 20, 118, 14, WHITE);
+    std::string camStr = std::string("Camera: ") + GetCameraName(m_cameras.GetCurrentCamera()) +
+                         " | Bear: " + GetLocationName(m_animatronics.GetBearLocation());
+    DrawText(camStr.c_str(), 20, 118, 14, WHITE);
 
-    std::string fStr = "Fox AI: " + std::to_string(m_animatronics.GetFoxAI()) + " | State: " + std::to_string(static_cast<int>(m_animatronics.GetFoxState()));
-    DrawText(fStr.c_str(), 20, 138, 14, WHITE);
+    std::string locStr = std::string("Rabbit: ") + GetLocationName(m_animatronics.GetRabbitLocation()) +
+                         " | Chicken: " + GetLocationName(m_animatronics.GetChickenLocation()) +
+                         " | Rare visitor: " + (m_animatronics.IsRareVisitorActive() ? "ACTIVE" : "inactive");
+    DrawText(locStr.c_str(), 20, 138, 14, WHITE);
 
-    DrawText("Keys: [1] Move Rabbit  [2] Move Chicken", 20, 170, 13, SKYBLUE);
-    DrawText("      [3] Move Bear    [4] Advance Fox", 20, 190, 13, SKYBLUE);
-    DrawText("      [P] Drain Power  [G] Golden Bear", 20, 210, 13, SKYBLUE);
-    DrawText("      [N] Skip to 6AM  [J] Test Jumpscare", 20, 230, 13, SKYBLUE);
-    DrawText("      [Q/E] Doors      [Z/C] Lights", 20, 250, 13, SKYBLUE);
-    DrawText("      [F2] Dump Detailed Texture Memory to Log", 20, 275, 13, GREEN);
+    std::string bStr = "Bear AI: " + std::to_string(m_animatronics.GetBearAI()) +
+                       " | Rabbit AI: " + std::to_string(m_animatronics.GetRabbitAI());
+    DrawText(bStr.c_str(), 20, 158, 14, WHITE);
+
+    std::string cStr = "Chicken AI: " + std::to_string(m_animatronics.GetChickenAI()) +
+                       " | Fox AI: " + std::to_string(m_animatronics.GetFoxAI()) +
+                       " | Fox state: " + std::to_string(static_cast<int>(m_animatronics.GetFoxState()));
+    DrawText(cStr.c_str(), 20, 178, 14, WHITE);
+
+    const std::string scareStr = std::string("Selected jumpscare: ") + GetAnimatronicName(m_activeJumpscareAttacker);
+    DrawText(scareStr.c_str(), 20, 198, 14, ORANGE);
+
+    DrawText("AI / SCARE TESTS", 20, 218, 13, GREEN);
+    DrawText("[1-4] Force move Bear/Rabbit/Chicken/Fox  [F9] Reset animatronics", 20, 238, 13, SKYBLUE);
+    DrawText("[G] Trigger rare visitor  [F6] Select scare  [J] Trigger selected scare", 20, 258, 13, SKYBLUE);
+    DrawText("[T] Freeze AI  [F7/F8] Lower/Raise all AI levels", 20, 278, 13, SKYBLUE);
+    DrawText("POWER / CLOCK", 20, 308, 13, GREEN);
+    DrawText("[P] Drain power to 0  [R] Restore power  [Y] Freeze clock", 20, 328, 13, SKYBLUE);
+    DrawText("[H] Advance one hour  [N] Fast-forward to 6 AM  [F5] Restart night", 20, 348, 13, SKYBLUE);
+    DrawText("[Q/E] Doors  [Z/C] Lights  [Space] Camera monitor  [M] Mute call", 20, 378, 13, SKYBLUE);
+    DrawText("[F2] Log texture memory details  [F1] Hide debug tools", 20, 398, 13, GREEN);
 
     if (IsKeyPressed(KEY_F2)) {
         m_assets.LogMemoryReport("Interactive F2 Debug");

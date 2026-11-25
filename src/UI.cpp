@@ -243,14 +243,15 @@ void UI::RenderMainMenu(int currentNight, bool /*customNightUnlocked*/, Settings
     constexpr float menuW = 340.0f;
     constexpr float yNewGame   = 310.0f;
     constexpr float yContinue  = 358.0f;
-    constexpr float yNight6    = 440.0f;
-    constexpr float yCustom    = 490.0f;
-    constexpr float ySettings  = 540.0f;
-    constexpr float yCredits   = 588.0f;
-    constexpr float yExit      = 632.0f;
+    constexpr float yRohansNight = 434.0f;
+    constexpr float yNight6      = 478.0f;
+    constexpr float yCustom      = 520.0f;
+    constexpr float ySettings    = 562.0f;
+    constexpr float yCredits     = 604.0f;
+    constexpr float yExit        = 646.0f;
 
     struct MenuEntry {
-        int id; // 0=NewGame, 1=Continue, 2=Night6, 3=CustomNight, 4=Settings, 5=Credits, 6=Exit
+        int id; // 0=NewGame, 1=Continue, 2=Rohan's Night; remaining entries follow
         const char* label;
         Rectangle hitRect;
         float textY;
@@ -259,11 +260,12 @@ void UI::RenderMainMenu(int currentNight, bool /*customNightUnlocked*/, Settings
     std::vector<MenuEntry> menuEntries = {
         { 0, "New Game",     Rectangle{ menuX, yNewGame - 5.0f,  menuW, 40.0f }, yNewGame },
         { 1, "Continue",     Rectangle{ menuX, yContinue - 5.0f, menuW, 72.0f }, yContinue },
-        { 2, "6th Night",    Rectangle{ menuX, yNight6 - 5.0f,   menuW, 40.0f }, yNight6 },
-        { 3, "Custom Night", Rectangle{ menuX, yCustom - 5.0f,   menuW, 40.0f }, yCustom },
-        { 4, "Settings",     Rectangle{ menuX, ySettings - 5.0f, menuW, 40.0f }, ySettings },
-        { 5, "Credits",      Rectangle{ menuX, yCredits - 5.0f,  menuW, 40.0f }, yCredits },
-        { 6, "Exit",         Rectangle{ menuX, yExit - 5.0f,     menuW, 40.0f }, yExit }
+        { 2, "Rohan's Night",Rectangle{ menuX, yRohansNight - 5.0f, menuW, 40.0f }, yRohansNight },
+        { 3, "6th Night",    Rectangle{ menuX, yNight6 - 5.0f,   menuW, 40.0f }, yNight6 },
+        { 4, "Custom Night", Rectangle{ menuX, yCustom - 5.0f,   menuW, 40.0f }, yCustom },
+        { 5, "Settings",     Rectangle{ menuX, ySettings - 5.0f, menuW, 40.0f }, ySettings },
+        { 6, "Credits",      Rectangle{ menuX, yCredits - 5.0f,  menuW, 40.0f }, yCredits },
+        { 7, "Exit",         Rectangle{ menuX, yExit - 5.0f,     menuW, 40.0f }, yExit }
     };
 
     for (const auto& entry : menuEntries) {
@@ -358,14 +360,16 @@ bool UI::HandleMainMenuInput(GameState& state, NightManager& nightMgr, Settings&
     constexpr float menuW = 340.0f;
     constexpr float yNewGame   = 310.0f;
     constexpr float yContinue  = 358.0f;
-    constexpr float yNight6    = 440.0f;
-    constexpr float yCustom    = 490.0f;
-    constexpr float ySettings  = 540.0f;
-    constexpr float yCredits   = 588.0f;
-    constexpr float yExit      = 632.0f;
+    constexpr float yRohansNight = 434.0f;
+    constexpr float yNight6      = 478.0f;
+    constexpr float yCustom      = 520.0f;
+    constexpr float ySettings    = 562.0f;
+    constexpr float yCredits     = 604.0f;
+    constexpr float yExit        = 646.0f;
 
     Rectangle newGameRect{ menuX, yNewGame - 5.0f,  menuW, 40.0f };
     Rectangle continueRect{ menuX, yContinue - 5.0f, menuW, 72.0f };
+    Rectangle rohansNightRect{ menuX, yRohansNight - 5.0f, menuW, 40.0f };
     Rectangle night6Rect{ menuX, yNight6 - 5.0f,   menuW, 40.0f };
     Rectangle customRect{ menuX, yCustom - 5.0f,   menuW, 40.0f };
     Rectangle settingsRect{ menuX, ySettings - 5.0f, menuW, 40.0f };
@@ -385,6 +389,11 @@ bool UI::HandleMainMenuInput(GameState& state, NightManager& nightMgr, Settings&
             audio.PlayMenuMusic(false);
             nightMgr.StartNight(nightMgr.GetHighestUnlockedNight());
             state = GameState::NightIntro;
+            return true;
+        }
+        if (CheckCollisionPointRec(mousePos, rohansNightRect)) {
+            audio.PlayBlip();
+            state = GameState::RohansNight;
             return true;
         }
         if (CheckCollisionPointRec(mousePos, night6Rect)) {

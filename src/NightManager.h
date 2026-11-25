@@ -40,6 +40,7 @@ public:
 
     void StartNight(int night);
     void Update(float dt);
+    void AdvanceHourForDebug();
 
     int GetCurrentNight() const { return m_currentNight; }
     int GetHighestUnlockedNight() const { return m_highestUnlockedNight; }

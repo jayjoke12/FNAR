@@ -109,6 +109,12 @@ void NightManager::Update(float dt) {
 
 }
 
+void NightManager::AdvanceHourForDebug() {
+    if (m_hourDuration <= 0.0f || m_currentHour >= 6) return;
+    m_nightTimer = std::min(m_nightTimer + m_hourDuration, 6.0f * m_hourDuration);
+    m_currentHour = std::min(static_cast<int>(m_nightTimer / m_hourDuration), 6);
+}
+
 const NightDifficulty& NightManager::GetCurrentDifficulty() const {
     if (m_currentNight >= 1 && m_currentNight <= 5) {
         return m_nightConfigs[m_currentNight - 1];

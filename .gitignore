@@ -65,3 +65,8 @@ Desktop.ini
 # Python cache
 __pycache__/
 *.py[cod]
+
+Template/
+add_game_logic_pages.py
+build_design.py
+generate_deliverables.py

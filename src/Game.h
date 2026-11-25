@@ -12,6 +12,7 @@
 #include "Power.h"
 #include "Animatronic.h"
 #include "UI.h"
+#include "RohanNight.h"
 
 namespace FNAF {
 
@@ -30,6 +31,7 @@ private:
     Power m_power;
     AnimatronicController m_animatronics;
     UI m_ui;
+    RohansNightMode m_rohansNight;
 
     // Transition & Intro timers
     float m_nightIntroTimer = 0.0f;
@@ -42,6 +44,9 @@ private:
 
     // Debug Mode
     bool m_debugMode = false;
+    bool m_debugAiFrozen = false;
+    bool m_debugClockFrozen = false;
+    float m_debugDefaultHourDuration = 60.0f;
 
     void ProcessInput();
     void Update(float dt);

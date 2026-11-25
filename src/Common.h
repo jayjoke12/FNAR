@@ -61,7 +61,8 @@ enum class GameState {
     CustomNightSelect,
     SettingsMenu,
     Paused,
-    Credits
+    Credits,
+    RohansNight
 };
 
 // Security Camera Identifiers

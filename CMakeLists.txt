@@ -80,6 +80,7 @@ set_source_files_properties(src/EmbeddedAssets.S PROPERTIES
 set(SOURCES
     src/main.cpp
     src/Game.cpp
+    src/RohanNight.cpp
     src/Office.cpp
     src/Cameras.cpp
     src/Animatronic.cpp
@@ -97,6 +98,7 @@ set(SOURCES
 set(HEADERS
     src/Common.h
     src/Game.h
+    src/RohanNight.h
     src/Office.h
     src/Cameras.h
     src/Animatronic.h
